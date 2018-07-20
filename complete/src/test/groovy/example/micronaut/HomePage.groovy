@@ -14,6 +14,16 @@ class HomePage extends Page {
         logoutButton { $('#logoutButton') }
         loginButton { $('#loginSubmitBtn') }
         registerButton { $('#registerSubmitBtn') }
+        loginFormErrorsDiv { $('#loginFormErrors') }
+        registerFormErrorsDiv { $('#registerFormErrors') }
+    }
+
+    String loginMessage() {
+        loginFormErrorsDiv.text()
+    }
+
+    String registerMessage() {
+        registerFormErrorsDiv.text()
     }
 
     void logout() {

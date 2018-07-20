@@ -14,6 +14,7 @@
         .alert {
             margin: 10px 0;
         }
+        a.btn { color: #ffffff !important; }
     </style>
 </head>
 <body>
@@ -29,11 +30,11 @@
         <input type="password" class="form-control" id="password" placeholder="Password">
     </div>
     <div id="loginForm">
-        <button id="loginSubmitBtn"  class="btn btn-primary" onclick="javascript:submitLogin();">Login</button>
+        <a id="loginSubmitBtn"  class="btn btn-primary" onclick="javascript:submitLogin();">Login</a>
         <div id="loginFormErrors"></div>
     </div>
     <div id="registerForm" style="margin-top: 10px;">
-        <button id="registerSubmitBtn" class="btn btn-primary" onclick="javascript:register();">Register</button>
+        <a id="registerSubmitBtn" class="btn btn-primary" onclick="javascript:register();">Register</a>
         <div id="registerFormErrors"></div>
     </div>
 </div>
