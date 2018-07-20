@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Micronaut Guide</title>
+    <link rel = "stylesheet" type = "text/css" href="assets/stylesheets/bootstrap.min.css"/>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+        #loginForm {
+            max-width: 90%;
+        }
+        .alert {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<button id="logoutButton" style="display: none;" class="btn btn-primary" onclick="javascript:logout();">Logout</button>
+<div id="loggedUser"></div>
+<div id="formFieldsForm" style="display: none;">
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input type="username" class="form-control" id="username" placeholder="Enter Username">
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Password">
+    </div>
+    <div id="loginForm">
+        <button id="loginSubmitBtn"  class="btn btn-primary" onclick="javascript:submitLogin();">Login</button>
+        <div id="loginFormErrors"></div>
+    </div>
+    <div id="registerForm" style="margin-top: 10px;">
+        <button id="registerSubmitBtn" class="btn btn-primary" onclick="javascript:register();">Register</button>
+        <div id="registerFormErrors"></div>
+    </div>
+</div>
+<script src="assets/javascripts/jquery-3.3.1.min.js"></script>
+<script src="assets/javascripts/popper.min.js"></script>
+<script src="assets/javascripts/bootstrap.min.js"></script>
+<script src="assets/javascripts/html5jwt.js"></script>
+<script src="assets/javascripts/networking.js"></script>
+<script src="assets/javascripts/bootstrap-utils.js"></script>
+<script type="text/javascript">
+    function submitLogin() {
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var path = "/login";
+        var jsonData = JSON.stringify({username: username, password: password});
+        postJson(path, jsonData, function(data) {
+            populateLocalStorageWithJwt(data);
+            refreshUiAfterSuccessLogin();
+
+        }, function() {
+            refreshUiAfterFailureLogin();
+
+        }, function() {
+            refreshUiAfterFailureLogin();
+        });
+    }
+
+    function clearLoginForm() {
+        $('#username').val('');
+        $('#password').val('');
+    }
+
+    function refreshUiAfterSuccessLogin() {
+        clearLoginForm();
+        hideLoginRegisterForm();
+        showLogout();
+        populateLoggedUser(welcomeMsg());
+        loadGravatar();
+    }
+
+    function welcomeMsg() {
+        return 'Logged in as: ' + getUsername();
+    }
+
+    function populateLoggedUser(msg) {
+        document.getElementById('loggedUser').innerHTML = '<span>'+msg+'</span>';
+    }
+
+    function clearLoggedUser() {
+        document.getElementById('loggedUser').innerHTML = '';
+    }
+
+    function refreshUiAfterFailureLogin() {
+        document.getElementById('loginFormErrors').innerHTML = alertMessage('User not found or invalid credentials', 'alert-danger');
+    }
+
+    function clearLoginFormErrors() {
+        document.getElementById('loginFormErrors').innerHTML = '';
+    }
+
+    function showLoginRegisterForm() {
+        $('#formFieldsForm').show();
+    }
+    function hideLoginRegisterForm() {
+        $('#formFieldsForm').hide();
+    }
+    function displayGravatarImage(data) {
+        var html = document.getElementById('loggedUser').innerHTML;
+        html += '<img src="https://www.gravatar.com/avatar/' + data.emailhash + '"/>';
+        document.getElementById('loggedUser').innerHTML = html;
+    }
+
+    function loadGravatar() {
+        var gravatarPath = '/user/gravatar';
+        getJson(gravatarPath,function(data) {
+            displayGravatarImage(data);
+        }, function() {
+            refreshAccessToken(function() {
+                console.log("token refreshed. loading gravatar");
+                getJson(gravatarPath,function(data) {
+                    displayGravatarImage(data);
+                }, function (data) {
+                    logout();
+                });
+            });
+        });
+    }
+    function register() {
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var jsonData = JSON.stringify({username: username, password: password});
+        postJson('/register', jsonData, function() {
+            refreshUiAfterSuccessRegistration();
+
+        }, function() {
+            refreshUiAfterFailureRegistration();
+
+        }, function() {
+            refreshUiAfterFailureRegistration();
+        });
+    }
+
+    function refreshUiAfterSuccessRegistration() {
+        document.getElementById('registerFormErrors').innerHTML = alertMessage('User registered', 'alert-success');
+    }
+
+    function refreshUiAfterFailureRegistration() {
+        document.getElementById('registerFormErrors').innerHTML = alertMessage('Could not register', 'alert-danger');
+    }
+
+    function clearRegisterFormErrors() {
+        document.getElementById('registerFormErrors').innerHTML = '';
+    }
+
+    function logout() {
+        clearLocalStorageJwt();
+        refreshUiIfNotLoggedIn();
+    }
+    function refreshUiIfNotLoggedIn() {
+        hideLogout();
+        clearLoggedUser();
+        clearRegisterFormErrors();
+        clearLoginForm();
+        clearLoginFormErrors();
+        showLoginRegisterForm();
+    }
+
+    function showLogout() {
+        $('#logoutButton').show();
+    }
+
+    function hideLogout() {
+        $('#logoutButton').hide();
+    }
+
+    $(document).ready(function() {
+        var accessToken = getAccessToken()
+        if (typeof(accessToken) != 'undefined' && accessToken != null) {
+            refreshUiAfterSuccessLogin();
+        } else {
+            refreshUiIfNotLoggedIn();
+        }
+    });
+</script>
+</body>
+</html>

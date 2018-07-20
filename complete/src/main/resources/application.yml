@@ -1,0 +1,34 @@
+micronaut:
+    application:
+        name: micronaut
+    router:
+        static:
+            resources:
+                enabled: true
+                mapping: /static/**
+                paths:
+                    - classpath:public
+    server:
+        port: 8080
+        cors:
+            enabled: true
+    security:
+        enabled: true
+        interceptUrlMap:
+            -
+                pattern: /static/**
+                httpMethod: GET
+                access:
+                    - isAnonymous()
+        endpoints:
+            login:
+                enabled: true
+        token:
+            jwt:
+                generator:
+                    accessTokenExpiration: 10
+                enabled: true
+                signatures:
+                    secret:
+                        generator:
+                            secret: pleaseChangeThisSecretForANewOne
